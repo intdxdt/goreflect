@@ -9,6 +9,10 @@ func GetType(v any) string {
 	return reflect.TypeOf(v).String()
 }
 
+func Fields(model any) ([]string, error) {
+	return GetJSONTaggedFields(model)
+}
+
 func GetJSONTaggedFields(s interface{}) ([]string, error) {
 	var tags = make([]string, 0, 32)
 	var v = reflect.ValueOf(s)
@@ -54,6 +58,24 @@ func GetValues(obj any, tags []string) ([]any, error) {
 		}
 	}
 	return vals, nil
+}
+
+func FieldReferenceMap(model any) (map[string]any, error) {
+	var dict = make(map[string]any, 32)
+	var fields, err = Fields(model)
+	if err != nil {
+		return dict, err
+	}
+
+	refs, err := GetFieldReferences(model, fields)
+	if err != nil {
+		return dict, err
+	}
+
+	for i, field := range fields {
+		dict[field] = refs[i]
+	}
+	return dict, nil
 }
 
 func GetFieldReferences(obj any, fields []string) ([]interface{}, error) {
