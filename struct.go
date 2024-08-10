@@ -78,12 +78,12 @@ func FieldReferenceMap(model any) (map[string]any, error) {
 	return dict, nil
 }
 
-func GetFieldReferences(obj any, fields []string) ([]interface{}, error) {
+func GetFieldReferences(obj any, fields []string) ([]any, error) {
 	var refs = make([]any, 0, len(fields))
 	var v = reflect.ValueOf(obj)
 
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		return nil, fmt.Errorf("input must be a pointer to a struct")
+		return refs, fmt.Errorf("input must be a pointer to a struct")
 	}
 
 	v = v.Elem() // deref struct
@@ -101,22 +101,28 @@ func GetFieldReferences(obj any, fields []string) ([]interface{}, error) {
 		if idx, ok := dict[field]; ok {
 			refs = append(refs, v.Field(idx).Addr().Interface())
 		} else {
-			return nil, fmt.Errorf("field '%s' not found", field)
+			return refs, fmt.Errorf("field '%s' not found", field)
 		}
 	}
 
 	return refs, nil
 }
 
-func FilterFieldReferences(fields []string, fieldRefMap map[string]any) ([]string, []any, error) {
+func FilterFieldReferences(fields []string, model any) ([]string, []any, error) {
 	var cols = make([]string, 0, len(fields))
 	var refs = make([]any, 0, len(fields))
+
+	fieldRefMap, err := FieldReferenceMap(model)
+	if err != nil {
+		return cols, refs, nil
+	}
+
 	for _, field := range fields {
 		if ref, ok := fieldRefMap[field]; ok {
 			cols = append(cols, field)
 			refs = append(refs, ref)
 		} else {
-			return nil, nil, fmt.Errorf("field '%s' not found", field)
+			return cols, refs, fmt.Errorf("field '%s' not found", field)
 		}
 	}
 	return cols, refs, nil
