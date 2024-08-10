@@ -1,0 +1,28 @@
+.idea
+*.iml
+.env
+*.pyc
+.air.toml
+.demos
+sandbox/
+node_modules
+dist
+bin
+tmp/
+
+#server
+dpms
+dpm-server
+dpm_server
+auth_root
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+*.out
